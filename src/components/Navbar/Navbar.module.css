@@ -1,0 +1,44 @@
+.navbar {
+
+    width: 100%;
+    position: fixed; /* Ensure navbar stays at the top */
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.9); /* Transparent background */
+    z-index: 2; /* Ensure navbar is above everything */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+.navbar-brand {
+    font-size: 1.5em;
+    color: var(--bs-navbar-brand-color);
+    text-decoration: none;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+}
+
+.navbarLogo {
+    width: 15%;
+    height: auto;
+    margin-right: 10px;
+}
+
+.nav-link {
+    color: white !important;
+}
+
+.navButton {
+    font-size: 1.2em;
+    padding: 10px 20px;
+    margin-right: 20px;
+    margin-left: 20px;
+}
+
+.buttonContainer {
+    display: flex;
+    gap: 20px;
+}

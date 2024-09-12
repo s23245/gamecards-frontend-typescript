@@ -1,0 +1,73 @@
+
+.gameSessionContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+}
+
+.gameContent {
+    width: 100%;
+    max-width: 1200px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.players, .heroes {
+    margin-bottom: 20px;
+}
+
+.heroList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.heroCard {
+    width: 200px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.heroCard:hover {
+    background: #f9f9f9;
+}
+
+.heroImage {
+    width: 100%;
+    height: auto;
+}
+
+.heroStats {
+    margin-top: 10px;
+    font-size: 0.9em;
+}
+
+.selectedHero {
+    background-color: #d1e7dd;
+    border-color: #0f5132;
+}
+
+.duelControl {
+    text-align: center;
+}
+
+.duelControl button {
+    padding: 10px 20px;
+    font-size: 1.2em;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.duelControl button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}

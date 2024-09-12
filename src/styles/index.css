@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Inknut+Antiqua:wght@400;700&display=swap');
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: 'Inknut Antiqua', serif;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}

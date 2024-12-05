@@ -1,21 +1,56 @@
 .loginContainer {
-    width: 100%;
-    height: 100vh;
+    min-width: 100vw;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f8f9fa;
+    background: url('/src/assets/images/background/new_back4.0-transformed.png') no-repeat center center;
+    background-size: cover;
+
 }
 
 .loginForm {
     width: 100%;
     max-width: 400px;
-    background: white;
-    padding: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 30px;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    color: #fff;
 }
-body
-{
-    justify-content: space-around;
+
+.loginForm h2 {
+    margin-bottom: 30px;
+    color:rgb(253, 239, 192);
+    font-weight: bold;
+    text-align: center;
+}
+
+.loginForm .form-control {
+    background-color: #333;
+    color: #fff;
+    border: none;
+    margin-bottom: 20px;
+}
+
+.loginForm .btn {
+    background-color: #e74c3c;
+    border: none;
+    font-size: 18px;
+    padding: 10px;
+}
+
+.loginForm .btn:hover {
+    background-color: #c0392b;
+}
+
+.loginForm a {
+    color: rgb(84, 154, 159);
+}
+
+.loginForm a:hover {
+    color: #fff;
+}
+
+.text-danger {
+    color: #e74c3c !important;
 }

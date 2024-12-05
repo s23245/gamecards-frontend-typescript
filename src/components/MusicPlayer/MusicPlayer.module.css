@@ -1,0 +1,51 @@
+.musicPlayer {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(25, 25, 23, 0);
+    border-radius: 45%;
+    display: flex;
+    align-items: center;
+    z-index: 1;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+}
+
+.controlButton {
+    background: rgb(84, 154, 159);
+    border: none;
+    border-radius: 30%;
+    color: rgb(253, 239, 192);
+    font-size: 20px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+.controlButton:hover
+{
+    background: rgb(70, 110, 112);
+}
+.volumeSlider
+{
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100px;
+    height: 8px;
+    background: rgba(84, 154, 159, 0.4); /* Custom track color */
+    border-radius: 5px;
+    outline: none;
+    margin-right: 10px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+.volumeSlider:hover
+{
+    background: rgba(70, 110, 112, 0.6);
+}
+.volumeSlider::-webkit-slider-thumb:hover
+{
+    background: rgb(70, 110, 112);
+}
+

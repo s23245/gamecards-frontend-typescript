@@ -1,105 +1,134 @@
 .homeContainer {
-    width: 100%;
+    width: 100vw;
     height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     position: relative;
     overflow: hidden;
-    background: url('/src/assets/images/background/sky_bridge.png') no-repeat center center fixed;
-
+    background: url('/src/assets/images/background/new_back3.0-transformed.png') no-repeat center center fixed;
     background-size: cover;
 }
 
-.navButton {
-    font-size: 1.2em;
-    padding: 10px 20px;
-    margin-right: 50px;
+/* Animated and more visible text styling */
+@keyframes textZoomIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .homeContent {
     text-align: center;
     width: 100%;
-    max-width: 800px;
-    font-family: 'Inknut Antiqua', serif;
+    max-width: 700px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    padding: 5%;
     z-index: 1;
-    position: relative; /* Ensure the content stays above the background */
-}
-
-.navbar {
-    margin-bottom: 20px;
-    width: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background-color: rgba(0, 0, 0, 0.9);
-    z-index: 2;
-}
-
-.navbar-brand {
-    padding-top: var(--bs-navbar-brand-padding-y);
-    padding-bottom: var(--bs-navbar-brand-padding-y);
-    margin-right: var(--bs-navbar-brand-margin-end);
-    font-size: var(--bs-navbar-brand-font-size);
-    color: var(--bs-navbar-brand-color);
-    text-decoration: none;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-}
-
-.navbarLogo {
-    width: 15%;
-    height: auto;
-    margin-right: 10px;
-}
-
-.nav-link {
-    color: white !important;
+    position: relative;
+    animation: textZoomIn 1.5s ease forwards;
+    animation-delay: 0.5s;
 }
 
 .homeTitle {
-    font-size: 3em;
+    font-size: 3.5em;
     font-weight: bold;
     margin-bottom: 20px;
+    color: #fff;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    opacity: 0;
+    animation: textZoomIn 1.5s ease forwards;
+    animation-delay: 0.8s;
 }
 
-.homeDescription {
-    font-size: 1.2em;
-    margin-bottom: 40px;
+.homeDescription
+{
+    background-color: rgba(159, 126, 103, 0.9);
+    border-bottom: 2px solid rgb(145, 97, 47);
+    border-top: 2px solid rgb(145, 97, 47);
+    border-radius: 5px;
+    width: 100%;
+    padding: 10px;
+    font-size: 1.4em;
+    margin-bottom: 50px;
+    font-weight: bold;
+    color: #ddd;
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    animation: textZoomIn 1.5s ease forwards;
+    animation-delay: 1.2s;
 }
 
-.logoImage {
-    width: 40%;
-    height: auto;
-    margin-bottom: 20px;
-}
-
+/* Redesigned input and button styling */
 .usernameInput {
+    width: 80%;
+    max-width: 500px;
     font-size: 1.2em;
-    padding: 10px 20px;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid rgb(70, 110, 112);
+    border-top: 2px solid rgb(70, 110, 112);
+    border-right: none;
+    border-left: none;
+    border-radius: 5px;
+    background-color: rgba(84, 154, 159, 0.9);
+    color: rgb(253, 239, 192);
+    text-align: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.usernameInput:hover {
+    color: rgb(253, 239, 192);
+    font-weight: bold;
+    opacity: 1;
+}
+
+.usernameInput:focus {
+    background-color: rgb(70, 110, 112);
+    border-color: rgb(59, 17, 15);
+    color:rgb(253, 239, 192);
+    outline: none;
 }
 
 .searchButton {
     font-size: 1.2em;
-    padding: 10px 20px;
-    background-color: #007bff;
+    font-weight: bold;
+    padding: 15px 30px;
+    border-radius: 5px;
     border: none;
-    color: white;
+    background-color: rgb(159, 126, 103);
+    color: rgb(253, 239, 192);
     cursor: pointer;
-    z-index: 2; /* Ensure the button stays above the background */
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .searchButton:hover {
-    background-color: #0056b3;
+    background-color: rgb(56, 17, 16);
+    transform: scale(1.05);
+}
+
+.searchButton:active {
+    transform: scale(0.98);
 }
 
 .searchMessage {
     font-size: 1.2em;
     margin-top: 20px;
-    color: #333;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    animation: textZoomIn 1s ease forwards;
+    animation-delay: 1.5s;
 }

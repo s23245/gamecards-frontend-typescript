@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar/Navbar';
 import axios from 'axios';
 import styles from '../styles/Account.module.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface User {
     firstName: string;
@@ -22,7 +21,7 @@ const Account: React.FC = () => {
             try {
                 const token = localStorage.getItem('token');
                 const response = await axios.get('http://localhost:8080/api/user/current', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { Authorization: `Bearer ${token}` },
                 });
                 setUser(response.data);
                 setUsername(response.data.username || '');
@@ -37,14 +36,18 @@ const Account: React.FC = () => {
     const handleUpdateUsername = async () => {
         try {
             const token = localStorage.getItem('token');
-            await axios.put('http://localhost:8080/api/user/username', { username }, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            await axios.put(
+                'http://localhost:8080/api/user/username',
+                { username },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
             setMessage('Username updated successfully');
             setEditMode(false);
             // Refresh user data
             const response = await axios.get('http://localhost:8080/api/user/current', {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
             });
             setUser(response.data);
         } catch (error) {
@@ -68,7 +71,9 @@ const Account: React.FC = () => {
                         <p>Last Name: {user.lastName}</p>
                         <p>Email: {user.email}</p>
                         <div className="mb-3">
-                            <label htmlFor="username" className="form-label">Username</label>
+                            <label htmlFor="username" className="form-label">
+                                Username
+                            </label>
                             <input
                                 type="text"
                                 id="username"
@@ -79,7 +84,7 @@ const Account: React.FC = () => {
                             />
                             <button
                                 onClick={() => setEditMode(!editMode)}
-                                className={`btn ${styles.editButton}`}
+                                className={styles.editButton}
                             >
                                 {editMode ? 'Cancel' : 'Edit'}
                             </button>
@@ -87,7 +92,7 @@ const Account: React.FC = () => {
                         {editMode && (
                             <button
                                 onClick={handleUpdateUsername}
-                                className="btn btn-primary w-100 mb-3"
+                                className={`${styles.updateButton} btn`}
                             >
                                 Update Username
                             </button>
@@ -96,8 +101,10 @@ const Account: React.FC = () => {
                 ) : (
                     <p>Loading...</p>
                 )}
-                <button onClick={handleLogout} className={`btn btn-danger w-100 ${styles.logoutButton}`}>Logout</button>
-                {message && <p className="mt-3">{message}</p>}
+                <button onClick={handleLogout} className={`${styles.logoutButton} btn`}>
+                    Logout
+                </button>
+                {message && <p className={styles.message}>{message}</p>}
             </div>
         </div>
     );

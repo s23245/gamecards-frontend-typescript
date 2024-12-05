@@ -5,7 +5,7 @@ import styles from '../styles/LoginForm.module.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const LoginForm: React.FC = () => {
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
@@ -13,7 +13,7 @@ const LoginForm: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8080/api/login', { email, password }, {
+            const response = await axios.post('http://localhost:8080/api/login', { username, password }, {
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -25,6 +25,7 @@ const LoginForm: React.FC = () => {
                 if (token) {
                     localStorage.setItem('token', token);
                     localStorage.setItem('username', response.data.username);
+                    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
                     navigate('/home');
                 } else {
                     setErrorMessage('Login failed: Authorization token missing');
@@ -50,7 +51,7 @@ const LoginForm: React.FC = () => {
             <form onSubmit={handleSubmit} className={styles.loginForm}>
                 <h2>Login</h2>
                 <div className="mb-3">
-                    <input type="email" className="form-control" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                    <input type="username" className="form-control" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required />
                 </div>
                 <div className="mb-3">
                     <input type="password" className="form-control" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />

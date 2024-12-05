@@ -1,7 +1,5 @@
-// src/pages/Home.tsx
 import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar/Navbar';
-import { searchGame } from '../services/GameService';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from '../styles/Home.module.css';
@@ -58,7 +56,6 @@ const Home: React.FC = () => {
         <div className={styles.homeContainer}>
             <Navbar />
             <div className={styles.homeContent}>
-                <img src="/src/assets/images/gamecards_logo.webp" alt="GameCards Logo" className={styles.logoImage} />
                 <h1 className={styles.homeTitle}>Welcome to GameCards</h1>
                 <p className={styles.homeDescription}>
                     Prepare for an exciting adventure in the world of GameCards. Challenge your friends to duels and become the ultimate champion!

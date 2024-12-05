@@ -7,10 +7,12 @@ import DuelDemo from './pages/DuelDemo';
 import Account from './pages/Account';
 import GameSession from './components/GameSession/GameSession';
 import DuelStage from "./components/DuelStage/DuelStage";
+import MusicPlayer from "./components/MusicPlayer/MusicPlayer";
 
 const App: React.FC = () => {
     return (
         <Router>
+            <MusicPlayer />
             <Routes>
                 <Route path="/home" element={<Home />} />
                 <Route path="/login" element={<Login />} />

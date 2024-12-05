@@ -4,6 +4,16 @@ import axios from 'axios';
 import Navbar from '../Navbar/Navbar';
 import styles from './GameSession.module.css';
 
+interface  Skill
+{
+    id: number;
+    name: string;
+    manaCost: number;
+    damage: number;
+    cooldown: number;
+    lastUsedRound: number;
+}
+
 interface Hero {
     id: number;
     name: string;
@@ -14,8 +24,8 @@ interface Hero {
     attackDamage: number;
     attackSpeed: number;
     mainElement: string;
-    abilities: string;
     imageUrl: string;
+    skills: Skill[];
 }
 
 interface GameSession {
@@ -24,16 +34,20 @@ interface GameSession {
     heroes: Hero[];
     selectedHeroes: Record<string, number>;
     duelStarted: boolean;
-    readyPlayers: string[];
 }
 
 const GameSession: React.FC = () => {
     const { gameId } = useParams<{ gameId: string }>();
     const [gameSession, setGameSession] = useState<GameSession | null>(null);
-    const [, setSelectedHero] = useState<Hero | null>(null);
-    const [loading, setLoading] = useState<boolean>(false);
+    const [, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (gameSession && gameSession.duelStarted) {
+            navigate(`/duel/${gameSession.id}`);
+        }
+    }, [gameSession, navigate]);
 
     useEffect(() => {
         const fetchGameSession = async () => {
@@ -48,16 +62,18 @@ const GameSession: React.FC = () => {
                 });
                 setGameSession(response.data);
             } catch (error) {
+                console.error('Error fetching game session:', error);
                 setError('Failed to load game session.');
             } finally {
                 setLoading(false);
             }
         };
 
-        const intervalId = setInterval(fetchGameSession, 100); // Poll every 0,1 seconds to refresh the session data
+        const intervalId = setInterval(fetchGameSession, 1000); // Poll every 1 second
 
-        return () => clearInterval(intervalId); // Clear interval on component unmount
+        return () => clearInterval(intervalId);
     }, [gameId]);
+
 
     if (!gameSession || !gameSession.users || !gameSession.heroes) {
         return (
@@ -72,32 +88,32 @@ const GameSession: React.FC = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const username = localStorage.getItem('username');
-            if (!token || !username) {
-                throw new Error('No token or username found');
+            if (!token) {
+                throw new Error('No token found');
             }
             const response = await axios.post(
                 `http://localhost:8080/api/games/selectHero`,
                 null,
                 {
-                    params: { gameId: gameId, heroId: hero.id },
+                    params: { gameId: gameSession.id, heroId: hero.id },
                     headers: {
                         Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
                     },
                 }
             );
             setGameSession(response.data);
-            setSelectedHero(hero);
         } catch (error) {
+            console.error('Error selecting hero:', error);
             setError('Failed to select hero.');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleGoToDuel = () => {
-        navigate(`/duel/${gameSession?.id}`);
+    const handleGoToDuel = async () => {
+        if (!gameSession) return;
+        // Navigate to duel page
+        navigate(`/duel/${gameSession.id}`);
     };
 
     const allPlayersReady = gameSession && Object.keys(gameSession.selectedHeroes).length === gameSession.users.length;
@@ -108,46 +124,64 @@ const GameSession: React.FC = () => {
             <div className={styles.gameContent}>
                 <h2>Game Session {gameSession.id}</h2>
                 <div className={styles.players}>
-                    <h3>Players and Selected Heroes</h3>
-                    {gameSession.users.map((user, index) => (
-                        <p key={index}>
-                            {user} {gameSession.selectedHeroes[user] && `✔ Hero: ${gameSession.heroes.find(hero => hero.id === gameSession.selectedHeroes[user])?.name}`}
-                        </p>
-                    ))}
+                    <h3>Players</h3>
+                    <ul className={styles.playerList}>
+                        {gameSession.users.map((username, index) => {
+                            const heroId = gameSession.selectedHeroes[username];
+                            const heroName = heroId
+                                ? gameSession.heroes.find((hero) => hero.id === heroId)?.name
+                                : null;
+                            return (
+                                <li key={index} className={styles.playerItem}>
+                                    <span className={styles.playerName}>{username}</span>
+                                    {heroName && (
+                                        <span className={styles.heroSelected}>
+                                            <span className={styles.checkmark}>✔</span>{heroName}
+                                        </span>
+                                    )}
+                                </li>
+                            );
+                        })}
+                    </ul>
                 </div>
                 <div className={styles.heroes}>
                     <h3>Heroes</h3>
                     <div className={styles.heroList}>
-                        {gameSession.heroes.map((hero) => (
-                            <div
-                                key={hero.id}
-                                className={`${styles.heroCard} ${gameSession.selectedHeroes[hero.id] ? styles.selectedHero : ''}`}
-                                onClick={() => handleHeroSelect(hero)}
-                            >
-                                <img
-                                    src={`/src/assets/images/${hero.imageUrl}`}
-                                    alt={hero.name}
-                                    className={styles.heroImage}
-                                />
-                                <div className={styles.heroStats}>
-                                    <p><strong>{hero.name}</strong></p>
-                                    <p>HP: {hero.hp}</p>
-                                    <p>Mana: {hero.mana}</p>
-                                    <p>Attack: {hero.attack}</p>
-                                    <p>Defense: {hero.defense}</p>
-                                    <p>Attack Damage: {hero.attackDamage}</p>
-                                    <p>Attack Speed: {hero.attackSpeed}</p>
-                                    <p>Main Element: {hero.mainElement}</p>
-                                    <p>Abilities: {hero.abilities}</p>
+                        {gameSession.heroes.map((hero) => {
+                            const isHeroSelected = Object.values(gameSession.selectedHeroes).includes(hero.id);
+                            return (
+                                <div
+                                    key={hero.id}
+                                    className={`${styles.heroCard} ${isHeroSelected ? styles.selectedHero : ''}`}
+                                    onClick={() => handleHeroSelect(hero)}
+                                >
+                                    <img
+                                        src={`/src/assets/images/${hero.imageUrl}`}
+                                        alt={hero.name}
+                                        className={styles.heroImage}
+                                    />
+                                    <div className={styles.heroBackground}></div> {/* Adding background behind the hero */}
+                                    <div className={styles.heroStats}>
+                                        <p>
+                                            <strong>{hero.name}</strong>
+                                        </p>
+                                        <p>HP: {hero.hp}</p>
+                                        <p>Mana: {hero.mana}</p>
+                                        <p>Attack: {hero.attack}</p>
+                                        <p>Defense: {hero.defense}</p>
+                                        <p>Attack Damage: {hero.attackDamage}</p>
+                                        <p>Attack Speed: {hero.attackSpeed}</p>
+                                        <p>Main Element: {hero.mainElement}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
                 {error && <div className={styles.errorMessage}>{error}</div>}
                 <div className={styles.duelControl}>
                     <button onClick={handleGoToDuel} disabled={!allPlayersReady}>
-                        {'Go to Duel'}
+                        Go to Duel
                     </button>
                 </div>
             </div>

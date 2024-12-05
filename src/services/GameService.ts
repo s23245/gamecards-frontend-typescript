@@ -1,5 +1,5 @@
-// src/services/GameService.ts
 import axios from 'axios';
+import {Hero} from "../components/Interfaces";
 
 const API_URL = 'http://localhost:8080/api/games';
 
@@ -12,8 +12,8 @@ export const getGameSession = async (gameId: string) => {
     return response.data;
 };
 
-export const searchGame = async (username: string) => {
-    const response = await axios.post(`${API_URL}/search`, { username }, {
+export const searchGame = async () => {
+    const response = await axios.post(`${API_URL}/search`, {  }, {
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -21,7 +21,7 @@ export const searchGame = async (username: string) => {
     return response.data;
 };
 
-export const selectHero = async (gameId: string, hero: any) => {
+export const selectHero = async (gameId: string, hero: Hero) => {
     const response = await axios.post(`${API_URL}/${gameId}/select-hero`, hero, {
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`

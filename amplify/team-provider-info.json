@@ -1,0 +1,15 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-gamecardsfrontendtyp-dev-120db-authRole",
+      "UnauthRoleArn": "arn:aws:iam::851725555813:role/amplify-gamecardsfrontendtyp-dev-120db-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::851725555813:role/amplify-gamecardsfrontendtyp-dev-120db-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-gamecardsfrontendtyp-dev-120db-deployment",
+      "UnauthRoleName": "amplify-gamecardsfrontendtyp-dev-120db-unauthRole",
+      "StackName": "amplify-gamecardsfrontendtyp-dev-120db",
+      "StackId": "arn:aws:cloudformation:us-east-1:851725555813:stack/amplify-gamecardsfrontendtyp-dev-120db/bc330b10-bb34-11ef-a7d8-0ec354915ff7",
+      "AmplifyAppId": "d2hpr8l2wfeq7r"
+    }
+  }
+}

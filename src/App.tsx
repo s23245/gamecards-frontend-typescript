@@ -31,4 +31,4 @@ const App: React.FC = () => {
     );
 };
 
-export default withAuthenticator(App);
+export default App;

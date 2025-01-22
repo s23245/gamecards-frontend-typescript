@@ -1,53 +1,43 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styles from './MusicPlayer.module.css';
 import { useLocation } from 'react-router-dom';
-import backgroundMusic from '/assets/music/background_music2.0.mp3';
-import criticalMomentMusic from '/assets/music/critical_moment_music.mp3';
-import {FaPause, FaPlay, FaVolumeMute, FaVolumeUp} from "react-icons/fa";
+import { FaPause, FaPlay, FaVolumeMute, FaVolumeUp } from "react-icons/fa";
 
 const MusicPlayer: React.FC = () => {
     const audioRef = useRef<HTMLAudioElement>(null);
-    const [isPlaying, setIsPlaying] = useState<boolean>(true);
-    const [isMuted, setIsMuted] = useState<boolean>(false);
-    const [volume, setVolume] = useState<number>(1);
+    const [isPlaying, setIsPlaying] = useState(true);
+    const [isMuted, setIsMuted] = useState(false);
+    const [volume, setVolume] = useState(1);
     const location = useLocation();
 
     useEffect(() => {
         if (!audioRef.current) return;
 
-        const updateMusicSource = () => {
-            if (!audioRef.current) return;
+        // Point to public folder assets using a root-relative path:
+        const inDuel = location.pathname.startsWith('/duel');
+        audioRef.current.src = inDuel
+            ? '/assets/music/critical_moment_music.mp3'
+            : '/assets/music/background_music2.0.mp3';
 
-            if (location.pathname.startsWith('/duel')) {
-                audioRef.current.src = criticalMomentMusic;
-            } else {
-                audioRef.current.src = backgroundMusic;
-            }
-
-            if (isPlaying) {
-                audioRef.current.play().catch((err) => {
-                    console.log('Autoplay prevented:', err);
-                });
-            } else {
-                audioRef.current.pause();
-            }
-        };
-
-        updateMusicSource();
-        // Include isPlaying in the dependency array to handle play/pause state changes
+        if (isPlaying) {
+            audioRef.current.play().catch((err) => {
+                console.log('Autoplay prevented:', err);
+            });
+        } else {
+            audioRef.current.pause();
+        }
     }, [location.pathname, isPlaying]);
 
     const handlePlayPause = () => {
-        if (audioRef.current) {
-            if (isPlaying) {
-                audioRef.current.pause();
-            } else {
-                audioRef.current.play().catch((err) => {
-                    console.log('Play prevented:', err);
-                });
-            }
-            setIsPlaying(!isPlaying);
+        if (!audioRef.current) return;
+        if (isPlaying) {
+            audioRef.current.pause();
+        } else {
+            audioRef.current.play().catch((err) => {
+                console.log('Play prevented:', err);
+            });
         }
+        setIsPlaying(!isPlaying);
     };
 
     const handleMuteUnmute = () => {
@@ -67,9 +57,9 @@ const MusicPlayer: React.FC = () => {
 
     return (
         <div className={styles.musicPlayer}>
-            <audio ref={audioRef} loop>
-                {/* ... */}
-            </audio>
+            {/* No src needed if we're setting it dynamically in useEffect */}
+            <audio ref={audioRef} loop />
+
             <div className={styles.controls}>
                 <button onClick={handlePlayPause} className={styles.controlButton}>
                     {isPlaying ? <FaPause /> : <FaPlay />}

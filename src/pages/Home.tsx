@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from '../styles/Home.module.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import {BASE_URL} from '../services/GameService'
 
 const Home: React.FC = () => {
     const [searching, setSearching] = useState(false);
@@ -15,7 +16,7 @@ const Home: React.FC = () => {
         const fetchUserInfo = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get('http://localhost:8080/api/user/current', {
+                const response = await axios.get(`${BASE_URL}/api/user/current`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 setUsername(response.data.username || '');
@@ -39,7 +40,7 @@ const Home: React.FC = () => {
             if (!token) {
                 throw new Error('No token found');
             }
-            const response = await axios.post(`http://localhost:8080/api/games/search`, { username }, {
+            const response = await axios.post(`${BASE_URL}/api/games/search`, { username }, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setSearchMessage(`Game found! Game ID: ${response.data.id}`);

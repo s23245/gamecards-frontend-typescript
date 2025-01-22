@@ -1,10 +1,10 @@
 import axios from 'axios';
 import {Hero} from "../components/Interfaces";
 
-const API_URL = 'http://localhost:8080/api/games';
+export const BASE_URL = 'https://gamecardsbackendjava-env.eba-g228jg6f.us-east-1.elasticbeanstalk.com';
 
 export const getGameSession = async (gameId: string) => {
-    const response = await axios.get(`${API_URL}/${gameId}`, {
+    const response = await axios.get(`${BASE_URL}/${gameId}`, {
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -13,7 +13,7 @@ export const getGameSession = async (gameId: string) => {
 };
 
 export const searchGame = async () => {
-    const response = await axios.post(`${API_URL}/search`, {  }, {
+    const response = await axios.post(`${BASE_URL}/search`, {  }, {
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -22,7 +22,7 @@ export const searchGame = async () => {
 };
 
 export const selectHero = async (gameId: string, hero: Hero) => {
-    const response = await axios.post(`${API_URL}/${gameId}/select-hero`, hero, {
+    const response = await axios.post(`${BASE_URL}/${gameId}/select-hero`, hero, {
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -31,7 +31,7 @@ export const selectHero = async (gameId: string, hero: Hero) => {
 };
 
 export const startDuel = async (gameId: string) => {
-    const response = await axios.post(`${API_URL}/${gameId}/start-duel`, null, {
+    const response = await axios.post(`${BASE_URL}/${gameId}/start-duel`, null, {
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

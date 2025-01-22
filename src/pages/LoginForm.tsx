@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/LoginForm.module.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import {BASE_URL} from "../services/GameService";
 
 const LoginForm: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -13,7 +14,7 @@ const LoginForm: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8080/api/login', { username, password }, {
+            const response = await axios.post(`${BASE_URL}/api/login`, { username, password }, {
                 headers: {
                     'Content-Type': 'application/json'
                 },

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/RegistrationForm.module.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import {BASE_URL} from "../services/GameService";
 
 const RegisterForm: React.FC = () => {
     const [firstName, setFirstName] = useState('');
@@ -15,7 +16,7 @@ const RegisterForm: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8080/api/register', { firstName, lastName, email, password }, {
+            const response = await axios.post(`${BASE_URL}/api/register`, { firstName, lastName, email, password }, {
                 headers: {
                     'Content-Type': 'application/json'
                 },

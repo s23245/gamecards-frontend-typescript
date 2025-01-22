@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar/Navbar';
 import axios from 'axios';
 import styles from '../styles/Account.module.css';
+import {BASE_URL} from "../services/GameService";
 
 interface User {
     firstName: string;
@@ -20,7 +21,7 @@ const Account: React.FC = () => {
         const fetchUser = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get('http://localhost:8080/api/user/current', {
+                const response = await axios.get(`${BASE_URL}/api/user/current`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setUser(response.data);
@@ -46,7 +47,7 @@ const Account: React.FC = () => {
             setMessage('Username updated successfully');
             setEditMode(false);
             // Refresh user data
-            const response = await axios.get('http://localhost:8080/api/user/current', {
+            const response = await axios.get(`${BASE_URL}/api/user/current`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setUser(response.data);

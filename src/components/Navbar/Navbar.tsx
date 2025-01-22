@@ -12,7 +12,7 @@ const Navbar: React.FC = () => {
             <div className="container-fluid">
                 <a className="navbar-brand" onClick={() => navigate('/home')} style={{ cursor: 'pointer' }}>
                     <img
-                        src="/src/assets/images/gamecards_logo_2 copy.png"
+                        src="/public/assets/images/gamecards_logo_2 copy.png"
                         alt="GameCards Logo"
                         className={styles.navbarLogo}
                     />

@@ -6,7 +6,7 @@
     align-items: center;
     position: relative;
     overflow: hidden;
-    background: url('../assets/images/background/new_back3.0-transformed.png') no-repeat center center fixed;
+    background: url('/public/assets/images/background/new_back3.0-transformed.png') no-repeat center center fixed;
     background-size: cover;
 }
 

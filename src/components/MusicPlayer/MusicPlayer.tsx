@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styles from './MusicPlayer.module.css';
 import { useLocation } from 'react-router-dom';
-import backgroundMusic from '../../assets/music/background_music2.0.mp3';
-import criticalMomentMusic from '../../assets/music/critical_moment_music.mp3';
+import backgroundMusic from '../../../public/assets/music/background_music2.0.mp3';
+import criticalMomentMusic from '../../../public/assets/music/critical_moment_music.mp3';
 import {FaPause, FaPlay, FaVolumeMute, FaVolumeUp} from "react-icons/fa";
 
 const MusicPlayer: React.FC = () => {

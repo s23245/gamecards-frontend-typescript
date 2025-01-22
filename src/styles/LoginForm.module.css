@@ -4,7 +4,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background: url('/src/assets/images/background/new_back4.0-transformed.png') no-repeat center center;
+    background: url('/public/assets/images/background/new_back4.0-transformed.png') no-repeat center center;
     background-size: cover;
 
 }

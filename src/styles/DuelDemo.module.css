@@ -18,7 +18,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: url('/src/assets/images/background/forest bridge.png') no-repeat center center fixed; /* Set background for duelContent */
+    background: url('/public/assets/images/background/forest bridge.png') no-repeat center center fixed; /* Set background for duelContent */
     background-size: cover;
     padding-bottom: 100px; /* Space for the button at the bottom */
 }

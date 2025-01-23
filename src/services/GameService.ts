@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {Hero} from "../components/Interfaces";
 
-export const BASE_URL = 'https://b-bondarenko.com';
+export const BASE_URL ="https://api.b-bondarenko.com";;
 
 export const getGameSession = async (gameId: string) => {
     const response = await axios.get(`${BASE_URL}/${gameId}`, {

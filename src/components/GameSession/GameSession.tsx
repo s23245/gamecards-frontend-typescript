@@ -157,7 +157,7 @@ const GameSession: React.FC = () => {
                                     onClick={() => handleHeroSelect(hero)}
                                 >
                                     <img
-                                        src={`/src/assets/images/${hero.imageUrl}`}
+                                        src={`/assets/images/${hero.imageUrl}`}
                                         alt={hero.name}
                                         className={styles.heroImage}
                                     />

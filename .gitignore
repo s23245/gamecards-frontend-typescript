@@ -18,8 +18,8 @@ dist-ssr
 .idea
 .DS_Store
 *.suo
-*.ntvs*
-*.njsproj
+*.ntvsr*
+       *.njspoj
 *.sln
 *.sw?
 

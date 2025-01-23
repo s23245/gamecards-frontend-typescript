@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../Navbar/Navbar';
 import styles from './GameSession.module.css';
+import {BASE_URL} from "../../services/GameService";
 
 interface  Skill
 {
@@ -57,7 +58,7 @@ const GameSession: React.FC = () => {
                 if (!token) {
                     throw new Error('No token found');
                 }
-                const response = await axios.get(`http://localhost:8080/api/games/${gameId}`, {
+                const response = await axios.get(`${BASE_URL}/api/games/${gameId}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setGameSession(response.data);
@@ -92,7 +93,7 @@ const GameSession: React.FC = () => {
                 throw new Error('No token found');
             }
             const response = await axios.post(
-                `http://localhost:8080/api/games/selectHero`,
+                `${BASE_URL}/api/games/selectHero`,
                 null,
                 {
                     params: { gameId: gameSession.id, heroId: hero.id },

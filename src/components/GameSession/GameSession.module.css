@@ -89,7 +89,7 @@
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.3s;
-    background-image: url('/public/assets/images/background/dirty_old_shirt.png');
+    background-image: url('/assets/images/background/dirty_old_shirt.png');
     background-size: cover;
 }
 
@@ -114,7 +114,7 @@
     left: 35%;
     width: 30%;
     height: 100%;
-    background-image: url('/public/assets/images/background/card_back1.png');
+    background-image: url('/assets/images/background/card_back1.png');
     background-size: cover;
     z-index: 0;
 

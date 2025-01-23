@@ -7,6 +7,7 @@ import axios from 'axios';
 import styles from './DuelStage.module.css';
 
 import { Hero, Card, DuelUpdate, PlayerStatus, HeroUpdate } from '../Interfaces';
+import {BASE_URL} from "../../services/GameService";
 
 const DuelStage: React.FC = () => {
     const { gameId } = useParams<{ gameId: string }>();
@@ -33,7 +34,7 @@ const DuelStage: React.FC = () => {
         const userName = getUserNameFromToken(token);
         setCurrentUserName(userName);
 
-        const socketUrl = `http://localhost:8080/ws?token=${encodeURIComponent(token)}`;
+        const socketUrl = `${BASE_URL}/ws?token=${encodeURIComponent(token)}`;
         const stompClient = new Client({
             webSocketFactory: () => new SockJS(socketUrl),
             debug: (str) => {
@@ -174,7 +175,7 @@ const DuelStage: React.FC = () => {
             }
 
             await axios.post(
-                `http://localhost:8080/api/duel/choose-card`,
+                `${BASE_URL}/api/duel/choose-card`,
                 { cardId: selectedCard.id, gameId },
                 {
                     headers: {
@@ -210,7 +211,7 @@ const DuelStage: React.FC = () => {
         }, 1000);
     };
 
-    const getImageUrl = (imageName: string) => `/src/assets/images/${imageName}`;
+    const getImageUrl = (imageName: string) => `/assets/images/${imageName}`;
 
     // Helper function to calculate modified hero stats
     const getModifiedHeroStats = (): Hero | null => {

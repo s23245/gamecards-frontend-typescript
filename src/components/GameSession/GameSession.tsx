@@ -150,12 +150,14 @@ const GameSession: React.FC = () => {
                     <div className={styles.heroList}>
                         {gameSession.heroes.map((hero) => {
                             const isHeroSelected = Object.values(gameSession.selectedHeroes).includes(hero.id);
+                            console.log("Image URL", hero.imageUrl);
                             return (
                                 <div
                                     key={hero.id}
                                     className={`${styles.heroCard} ${isHeroSelected ? styles.selectedHero : ''}`}
                                     onClick={() => handleHeroSelect(hero)}
                                 >
+
                                     <img
                                         src={`/assets/images/${hero.imageUrl}`}
                                         alt={hero.name}

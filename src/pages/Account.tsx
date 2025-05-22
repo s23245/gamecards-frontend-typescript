@@ -38,7 +38,7 @@ const Account: React.FC = () => {
         try {
             const token = localStorage.getItem('token');
             await axios.put(
-                'http://localhost:8080/api/user/username',
+                `${BASE_URL}/api/user/username`,
                 { username },
                 {
                     headers: { Authorization: `Bearer ${token}` },

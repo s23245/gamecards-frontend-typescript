@@ -150,7 +150,7 @@ const GameSession: React.FC = () => {
                     <div className={styles.heroList}>
                         {gameSession.heroes.map((hero) => {
                             const isHeroSelected = Object.values(gameSession.selectedHeroes).includes(hero.id);
-                            console.log("Image URL", hero.imageUrl);
+                            console.log("Hero", hero);
                             return (
                                 <div
                                     key={hero.id}

@@ -22,10 +22,10 @@ interface Hero {
     mana: number;
     attack: number;
     defense: number;
-    attackDamage: number;
-    attackSpeed: number;
-    mainElement: string;
-    imageUrl: string;
+    attack_damage: number;
+    attack_speed: number;
+    main_element: string;
+    image_url: string;
     skills: Skill[];
 }
 
@@ -159,7 +159,7 @@ const GameSession: React.FC = () => {
                                 >
 
                                     <img
-                                        src={`/assets/images/${hero.imageUrl}`}
+                                        src={`/assets/images/${hero.image_url}`}
                                         alt={hero.name}
                                         className={styles.heroImage}
                                     />
@@ -172,9 +172,9 @@ const GameSession: React.FC = () => {
                                         <p>Mana: {hero.mana}</p>
                                         <p>Attack: {hero.attack}</p>
                                         <p>Defense: {hero.defense}</p>
-                                        <p>Attack Damage: {hero.attackDamage}</p>
-                                        <p>Attack Speed: {hero.attackSpeed}</p>
-                                        <p>Main Element: {hero.mainElement}</p>
+                                        <p>Attack Damage: {hero.attack_damage}</p>
+                                        <p>Attack Speed: {hero.attack_speed}</p>
+                                        <p>Main Element: {hero.main_element}</p>
                                     </div>
                                 </div>
                             );

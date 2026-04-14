@@ -9,6 +9,32 @@ import styles from './DuelStage.module.css';
 import { Hero, Card, DuelUpdate, PlayerStatus, HeroUpdate } from '../Interfaces';
 import {BASE_URL} from "../../services/GameService";
 
+const REQUIRED_HERO_FIELDS: (keyof Hero)[] = [
+    'id',
+    'name',
+    'hp',
+    'maxHp',
+    'mana',
+    'maxMana',
+    'attack',
+    'defense',
+    'attackDamage',
+    'attackSpeed',
+    'mainElement',
+    'imageUrl',
+    'skills',
+];
+
+const REQUIRED_CARD_FIELDS: (keyof Card)[] = [
+    'id',
+    'name',
+    'description',
+    'rarity',
+    'imageUrl',
+    'attributes',
+    'skills',
+];
+
 const DuelStage: React.FC = () => {
     const { gameId } = useParams<{ gameId: string }>();
     const [playerHero, setPlayerHero] = useState<Hero | null>(null);
@@ -17,7 +43,6 @@ const DuelStage: React.FC = () => {
     const [selectedCard, setSelectedCard] = useState<Card | null>(null);
     const [duelResult, setDuelResult] = useState<string>('');
     const [duelStageState, setDuelStageState] = useState<'base' | 'waiting' | 'countdown' | 'duel' | 'post-duel' | 'game-over'>('base');
-    const [currentUserName, setCurrentUserName] = useState<string | null>(null);
     const [countdown, setCountdown] = useState<number>(5);
     const [duelLogs, setDuelLogs] = useState<string[]>([]);
     const stompClientRef = useRef<Client | null>(null);
@@ -32,7 +57,10 @@ const DuelStage: React.FC = () => {
         }
 
         const userName = getUserNameFromToken(token);
-        setCurrentUserName(userName);
+        if (!userName) {
+            console.error('Username is missing from token.');
+            return;
+        }
 
         const socketUrl = `${BASE_URL}/ws?token=${encodeURIComponent(token)}`;
         const stompClient = new Client({
@@ -44,12 +72,6 @@ const DuelStage: React.FC = () => {
             onConnect: () => {
                 console.log('WebSocket Connected');
 
-                // Send player-ready message
-                stompClient.publish({
-                    destination: '/app/player-ready',
-                    body: JSON.stringify({ gameId, username: currentUserName }),
-                });
-
                 // Subscribe to hero stats
                 stompClient.subscribe(`/topic/hero-stats/${gameId}/${userName}`, (message: IMessage) => {
                     try {
@@ -57,6 +79,7 @@ const DuelStage: React.FC = () => {
                         const heroUpdate: HeroUpdate = JSON.parse(message.body);
                         console.log('Parsed heroUpdate:', heroUpdate);
                         console.log('Hero stats:', heroUpdate.hero);
+                        logMissingFields('heroUpdate.hero', heroUpdate.hero, REQUIRED_HERO_FIELDS);
                         setPlayerHero(heroUpdate.hero);
                     } catch (e) {
                         console.error('Error parsing hero stats:', e, 'Message body:', message.body);
@@ -67,8 +90,19 @@ const DuelStage: React.FC = () => {
                 stompClient.subscribe(`/topic/cards/${gameId}/${userName}`, (message: IMessage) => {
                     try {
                         const receivedCards: Card[] = JSON.parse(message.body);
+                        if (!Array.isArray(receivedCards)) {
+                            console.error('Cards payload is not an array:', receivedCards);
+                            return;
+                        }
                         console.log('Hero cards:', receivedCards);
+                        if (receivedCards.length === 0) {
+                            console.warn('Cards payload is empty for user:', userName);
+                        }
+                        receivedCards.forEach((card, index) => {
+                            logMissingFields(`cards[${index}]`, card, REQUIRED_CARD_FIELDS);
+                        });
                         setCards(receivedCards);
+                        setSelectedCard(null);
                         setDuelStageState('base');
                     } catch (e) {
                         console.error('Error parsing cards:', e, 'Message body:', message.body);
@@ -91,11 +125,13 @@ const DuelStage: React.FC = () => {
                 // Subscribe to duel progress
                 stompClient.subscribe(`/topic/duel-progress/${gameId}`, (message: IMessage) => {
                     const duelUpdate: DuelUpdate = JSON.parse(message.body);
+                    logMissingFields('duelUpdate.hero1', duelUpdate.hero1, REQUIRED_HERO_FIELDS);
+                    logMissingFields('duelUpdate.hero2', duelUpdate.hero2, REQUIRED_HERO_FIELDS);
 
                     // Append new logs
                     setDuelLogs((prevLogs) => [...prevLogs, ...duelUpdate.logs]);
 
-                    if (currentUserName === duelUpdate.user1) {
+                    if (userName === duelUpdate.user1) {
                         setPlayerHero(duelUpdate.hero1);
                         setOpponentHero(duelUpdate.hero2);
                     } else {
@@ -123,6 +159,12 @@ const DuelStage: React.FC = () => {
                     const receivedPlayersStatus: PlayerStatus[] = JSON.parse(message.body);
                     setPlayersStatus(receivedPlayersStatus);
                 });
+
+                // Send player-ready after subscriptions are active so card messages are not missed.
+                stompClient.publish({
+                    destination: '/app/player-ready',
+                    body: JSON.stringify({ gameId, username: userName }),
+                });
             },
             onStompError: (frame) => {
                 console.error('Broker reported error: ' + frame.headers['message']);
@@ -148,7 +190,7 @@ const DuelStage: React.FC = () => {
             }
         };
 
-    }, [currentUserName, gameId]);
+    }, [gameId]);
 
     const getUserNameFromToken = (token: string): string | null => {
         try {
@@ -211,7 +253,35 @@ const DuelStage: React.FC = () => {
         }, 1000);
     };
 
-    const getImageUrl = (imageName: string) => `/assets/images/${imageName}`;
+    const logMissingFields = <T extends object>(label: string, value: T | null | undefined, fields: (keyof T)[]) => {
+        if (!value) {
+            console.warn(`${label} is missing.`);
+            return;
+        }
+
+        const missingFields = fields.filter((field) => value[field] === undefined || value[field] === null);
+        if (missingFields.length > 0) {
+            console.warn(`${label} is missing fields:`, missingFields, value);
+        }
+    };
+
+    const getImageUrl = (imageName?: string | null) => {
+        if (!imageName) {
+            console.warn('Missing imageUrl. Using fallback card back image.');
+            return '/assets/images/background/card_back1.png';
+        }
+
+        return `/assets/images/${imageName}`;
+    };
+
+    const getStatBarWidth = (current?: number, max?: number) => {
+        if (typeof current !== 'number' || typeof max !== 'number' || max <= 0) {
+            console.warn('Invalid stat values for progress bar:', { current, max });
+            return '0%';
+        }
+
+        return `${Math.min(100, Math.max(0, (current / max) * 100))}%`;
+    };
 
     // Helper function to calculate modified hero stats
     const getModifiedHeroStats = (): Hero | null => {
@@ -279,7 +349,7 @@ const DuelStage: React.FC = () => {
                                     <div className={styles.progressBar}>
                                         <div
                                             className={styles.progress}
-                                            style={{ width: `${(playerHero.hp / playerHero.maxHp) * 100}%`, backgroundColor: 'green' }}
+                                            style={{ width: getStatBarWidth(playerHero.hp, playerHero.maxHp), backgroundColor: 'green' }}
                                         ></div>
                                     </div>
                                     <span>{playerHero.hp}/{playerHero.maxHp}</span>
@@ -289,7 +359,7 @@ const DuelStage: React.FC = () => {
                                     <div className={styles.progressBar}>
                                         <div
                                             className={styles.progress}
-                                            style={{ width: `${(playerHero.mana / playerHero.maxMana) * 100}%`, backgroundColor: 'blue' }}
+                                            style={{ width: getStatBarWidth(playerHero.mana, playerHero.maxMana), backgroundColor: 'blue' }}
                                         ></div>
                                     </div>
                                     <span>{playerHero.mana}/{playerHero.maxMana}</span>
@@ -305,16 +375,19 @@ const DuelStage: React.FC = () => {
                                 {/* Add more stats as needed */}
 
                                 <p>
-                                    Main Element: <span className={`${styles.element} ${styles[playerHero.mainElement.toLowerCase()]}`}>{playerHero.mainElement}</span>
+                                    Main Element: <span className={`${styles.element} ${styles[(playerHero.mainElement || 'unknown').toLowerCase()] || ''}`}>{playerHero.mainElement || 'Unknown'}</span>
                                 </p>
                             </div>
                         </div>
                         <h2>Choose a Card</h2>
                         <div className={styles.cardSelection}>
+                            {cards.length === 0 && (
+                                <p>No cards received yet.</p>
+                            )}
                             {cards.map((card) => (
                                 <div
                                     key={card.id}
-                                    className={`${styles.card} ${selectedCard?.id === card.id ? styles.selectedCard : ''} ${styles[card.rarity.toLowerCase()]}`}
+                                    className={`${styles.card} ${selectedCard?.id === card.id ? styles.selectedCard : ''} ${styles[(card.rarity || 'common').toLowerCase()] || ''}`}
                                     onClick={() => handleCardSelect(card)}
                                 >
                                     {selectedCard?.id === card.id && (
@@ -388,7 +461,7 @@ const DuelStage: React.FC = () => {
                                     <div className={styles.progressBar}>
                                         <div
                                             className={styles.progress}
-                                            style={{ width: `${(playerHero.hp / playerHero.maxHp) * 100}%`, backgroundColor: 'green' }}
+                                            style={{ width: getStatBarWidth(playerHero.hp, playerHero.maxHp), backgroundColor: 'green' }}
                                         ></div>
                                     </div>
                                     <span>{playerHero.hp}/{playerHero.maxHp}</span>
@@ -398,7 +471,7 @@ const DuelStage: React.FC = () => {
                                     <div className={styles.progressBar}>
                                         <div
                                             className={styles.progress}
-                                            style={{ width: `${(playerHero.mana / playerHero.maxMana) * 100}%`, backgroundColor: 'blue' }}
+                                            style={{ width: getStatBarWidth(playerHero.mana, playerHero.maxMana), backgroundColor: 'blue' }}
                                         ></div>
                                     </div>
                                     <span>{playerHero.mana}/{playerHero.maxMana}</span>
@@ -419,7 +492,7 @@ const DuelStage: React.FC = () => {
                                     <div className={styles.progressBar}>
                                         <div
                                             className={styles.progress}
-                                            style={{ width: `${(opponentHero.hp / opponentHero.maxHp) * 100}%`, backgroundColor: 'green' }}
+                                            style={{ width: getStatBarWidth(opponentHero.hp, opponentHero.maxHp), backgroundColor: 'green' }}
                                         ></div>
                                     </div>
                                     <span>{opponentHero.hp}/{opponentHero.maxHp}</span>
@@ -429,7 +502,7 @@ const DuelStage: React.FC = () => {
                                     <div className={styles.progressBar}>
                                         <div
                                             className={styles.progress}
-                                            style={{ width: `${(opponentHero.mana / opponentHero.maxMana) * 100}%`, backgroundColor: 'blue' }}
+                                            style={{ width: getStatBarWidth(opponentHero.mana, opponentHero.maxMana), backgroundColor: 'blue' }}
                                         ></div>
                                     </div>
                                     <span>{opponentHero.mana}/{opponentHero.maxMana}</span>

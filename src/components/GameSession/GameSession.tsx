@@ -4,30 +4,7 @@ import axios from 'axios';
 import Navbar from '../Navbar/Navbar';
 import styles from './GameSession.module.css';
 import {BASE_URL} from "../../services/GameService";
-
-interface  Skill
-{
-    id: number;
-    name: string;
-    manaCost: number;
-    damage: number;
-    cooldown: number;
-    lastUsedRound: number;
-}
-
-interface Hero {
-    id: number;
-    name: string;
-    hp: number;
-    mana: number;
-    attack: number;
-    defense: number;
-    attack_damage: number;
-    attack_speed: number;
-    main_element: string;
-    image_url: string;
-    skills: Skill[];
-}
+import { Hero } from '../Interfaces';
 
 interface GameSession {
     id: string;
@@ -150,7 +127,6 @@ const GameSession: React.FC = () => {
                     <div className={styles.heroList}>
                         {gameSession.heroes.map((hero) => {
                             const isHeroSelected = Object.values(gameSession.selectedHeroes).includes(hero.id);
-                            console.log("Hero", hero);
                             return (
                                 <div
                                     key={hero.id}
@@ -159,7 +135,7 @@ const GameSession: React.FC = () => {
                                 >
 
                                     <img
-                                        src={`/assets/images/${hero.image_url}`}
+                                        src={`/assets/images/${hero.imageUrl}`}
                                         alt={hero.name}
                                         className={styles.heroImage}
                                     />
@@ -168,13 +144,13 @@ const GameSession: React.FC = () => {
                                         <p>
                                             <strong>{hero.name}</strong>
                                         </p>
-                                        <p>HP: {hero.hp}</p>
-                                        <p>Mana: {hero.mana}</p>
+                                        <p>HP: {hero.hp}/{hero.maxHp}</p>
+                                        <p>Mana: {hero.mana}/{hero.maxMana}</p>
                                         <p>Attack: {hero.attack}</p>
                                         <p>Defense: {hero.defense}</p>
-                                        <p>Attack Damage: {hero.attack_damage}</p>
-                                        <p>Attack Speed: {hero.attack_speed}</p>
-                                        <p>Main Element: {hero.main_element}</p>
+                                        <p>Attack Damage: {hero.attackDamage}</p>
+                                        <p>Attack Speed: {hero.attackSpeed}</p>
+                                        <p>Main Element: {hero.mainElement}</p>
                                     </div>
                                 </div>
                             );

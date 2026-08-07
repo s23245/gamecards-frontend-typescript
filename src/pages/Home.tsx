@@ -1,77 +1,49 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar/Navbar';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import styles from '../styles/Home.module.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import {BASE_URL} from '../services/GameService'
+import { getErrorMessage } from '../api/client';
+import { getCurrentUser, searchGame } from '../services/GameService';
 
-const Home: React.FC = () => {
+const Home = () => {
     const [searching, setSearching] = useState(false);
-    const [searchMessage, setSearchMessage] = useState('');
+    const [message, setMessage] = useState('');
     const [username, setUsername] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchUserInfo = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await axios.get(`${BASE_URL}/api/user/current`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                setUsername(response.data.username || '');
-            } catch (error) {
-                console.error('Failed to fetch user info:', error);
-            }
-        };
-
-        fetchUserInfo();
+        let active = true;
+        getCurrentUser()
+            .then((user) => { if (active) setUsername(user.username); })
+            .catch((error) => { if (active) setMessage(getErrorMessage(error, 'Unable to load your account.')); });
+        return () => { active = false; };
     }, []);
 
     const handleSearchGame = async () => {
-        if (!username) {
-            setSearchMessage('Please enter your username.');
-            return;
-        }
+        if (searching) return;
         setSearching(true);
-        setSearchMessage('Searching for a game...');
+        setMessage('Searching for another player…');
         try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                throw new Error('No token found');
-            }
-            const response = await axios.post(`${BASE_URL}/api/games/search`, { username }, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            setSearchMessage(`Game found! Game ID: ${response.data.id}`);
-            navigate(`/game-session/${response.data.id}`);
+            const game = await searchGame();
+            if (!game.id) throw new Error('The server returned an invalid game session.');
+            navigate(`/game-session/${game.id}`);
         } catch (error) {
-            setSearchMessage('Error searching for a game. Please try again.');
+            setMessage(getErrorMessage(error, 'Could not start matchmaking.'));
         } finally {
             setSearching(false);
         }
     };
 
-
     return (
         <div className={styles.homeContainer}>
             <Navbar />
             <div className={styles.homeContent}>
-                <h1 className={styles.homeTitle}>Welcome to GameCards</h1>
-                <p className={styles.homeDescription}>
-                    Prepare for an exciting adventure in the world of GameCards. Challenge your friends to duels and become the ultimate champion!
-                </p>
-                <input
-                    type="text"
-                    placeholder="Enter your username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className={`form-control mb-3 ${styles.usernameInput}`}
-                />
-                <button onClick={handleSearchGame} className={`btn btn-primary ${styles.searchButton}`} disabled={searching}>
-                    {searching ? 'Searching...' : 'Find Game'}
+                <h1 className={styles.homeTitle}>Welcome to GameCards{username ? `, ${username}` : ''}</h1>
+                <p className={styles.homeDescription}>Challenge another player, choose your hero, and build power with cards between duels.</p>
+                <button onClick={handleSearchGame} className={`btn btn-primary ${styles.searchButton}`} disabled={searching || !username}>
+                    {searching ? 'Searching…' : 'Find Game'}
                 </button>
-                {searchMessage && <p className={styles.searchMessage}>{searchMessage}</p>}
+                {message && <p role="status" className={styles.searchMessage}>{message}</p>}
             </div>
         </div>
     );

@@ -1,8 +1,5 @@
-import axios from 'axios';
+import { apiClient } from '../api/client';
 
-const BASE_URL = 'https://gamecardsbackendjava-env.eba-g228jg6f.us-east-1.elasticbeanstalk.com';
-
-export async function getHelloMessage() {
-    const response = await axios.get(`${BASE_URL}/api/hello`);
-    return response.data;
+export async function getHelloMessage(): Promise<string> {
+    return (await apiClient.get<string>('/api/hello')).data;
 }

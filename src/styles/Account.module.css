@@ -4,7 +4,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: url('/public/assets/images/background/new_back3.0-transformed.png') no-repeat center center fixed;
+    background: url('/assets/images/background/new_back3.0-transformed.png') no-repeat center center fixed;
     background-size: cover;
     font-weight: bold;
 }

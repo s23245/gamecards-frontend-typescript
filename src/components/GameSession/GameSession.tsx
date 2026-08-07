@@ -1,168 +1,121 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../Navbar/Navbar';
 import styles from './GameSession.module.css';
-import {BASE_URL} from "../../services/GameService";
-import { Hero } from '../Interfaces';
+import type { GameSessionData, Hero } from '../Interfaces';
+import { getErrorMessage } from '../../api/client';
+import { getGameSession, selectHero } from '../../services/GameService';
+import { getStoredToken, getTokenUsername } from '../../auth/token';
 
-interface GameSession {
-    id: string;
-    users: string[];
-    heroes: Hero[];
-    selectedHeroes: Record<string, number>;
-    duelStarted: boolean;
-}
-
-const GameSession: React.FC = () => {
+const GameSession = () => {
     const { gameId } = useParams<{ gameId: string }>();
-    const [gameSession, setGameSession] = useState<GameSession | null>(null);
-    const [, setLoading] = useState<boolean>(false);
+    const [game, setGame] = useState<GameSessionData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [selecting, setSelecting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
+    const currentUsername = useMemo(() => {
+        const token = getStoredToken();
+        return token ? getTokenUsername(token) : null;
+    }, []);
 
     useEffect(() => {
-        if (gameSession && gameSession.duelStarted) {
-            navigate(`/duel/${gameSession.id}`);
+        if (!gameId) {
+            setError('The game URL is missing a game id.');
+            setLoading(false);
+            return;
         }
-    }, [gameSession, navigate]);
-
-    useEffect(() => {
-        const fetchGameSession = async () => {
+        let active = true;
+        let timer: number | undefined;
+        const poll = async () => {
             try {
-                setLoading(true);
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    throw new Error('No token found');
+                const response = await getGameSession(gameId);
+                if (!active) return;
+                setGame(response);
+                setError(null);
+                if (response.duelStarted) {
+                    navigate(`/duel/${response.id}`, { replace: true });
+                    return;
                 }
-                const response = await axios.get(`${BASE_URL}/api/games/${gameId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                setGameSession(response.data);
-            } catch (error) {
-                console.error('Error fetching game session:', error);
-                setError('Failed to load game session.');
+            } catch (requestError) {
+                if (active) setError(getErrorMessage(requestError, 'Unable to reach this game session.'));
             } finally {
-                setLoading(false);
+                if (active) {
+                    setLoading(false);
+                    timer = window.setTimeout(poll, 1000);
+                }
             }
         };
-
-        const intervalId = setInterval(fetchGameSession, 1000); // Poll every 1 second
-
-        return () => clearInterval(intervalId);
-    }, [gameId]);
-
-
-    if (!gameSession || !gameSession.users || !gameSession.heroes) {
-        return (
-            <div className={styles.gameSessionContainer}>
-                <Navbar />
-                <p>There is a problem with the game session. Reload the page or find a new game session.</p>
-            </div>
-        );
-    }
+        void poll();
+        return () => {
+            active = false;
+            if (timer) window.clearTimeout(timer);
+        };
+    }, [gameId, navigate]);
 
     const handleHeroSelect = async (hero: Hero) => {
-        setLoading(true);
+        if (!gameId || !game || selecting || !currentUsername) return;
+        const selectedBy = Object.entries(game.selectedHeroes).find(([, id]) => id === hero.id)?.[0];
+        if (selectedBy && selectedBy !== currentUsername) return;
+        setSelecting(true);
+        setError(null);
         try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                throw new Error('No token found');
-            }
-            const response = await axios.post(
-                `${BASE_URL}/api/games/selectHero`,
-                null,
-                {
-                    params: { gameId: gameSession.id, heroId: hero.id },
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            setGameSession(response.data);
-        } catch (error) {
-            console.error('Error selecting hero:', error);
-            setError('Failed to select hero.');
+            const response = await selectHero(gameId, hero.id);
+            setGame(response);
+            if (response.duelStarted) navigate(`/duel/${response.id}`, { replace: true });
+        } catch (requestError) {
+            setError(getErrorMessage(requestError, 'Failed to select this hero.'));
         } finally {
-            setLoading(false);
+            setSelecting(false);
         }
     };
 
-    const handleGoToDuel = async () => {
-        if (!gameSession) return;
-        // Navigate to duel page
-        navigate(`/duel/${gameSession.id}`);
-    };
-
-    const allPlayersReady = gameSession && Object.keys(gameSession.selectedHeroes).length === gameSession.users.length;
+    if (loading && !game) return <div className={styles.gameSessionContainer}><Navbar /><p>Loading game session…</p></div>;
+    if (!game) return <div className={styles.gameSessionContainer}><Navbar /><p role="alert">{error || 'Game session not found.'}</p></div>;
 
     return (
         <div className={styles.gameSessionContainer}>
             <Navbar />
             <div className={styles.gameContent}>
-                <h2>Game Session {gameSession.id}</h2>
+                <h2>Game Session {game.id}</h2>
                 <div className={styles.players}>
-                    <h3>Players</h3>
+                    <h3>Players ({game.users.length}/2)</h3>
                     <ul className={styles.playerList}>
-                        {gameSession.users.map((username, index) => {
-                            const heroId = gameSession.selectedHeroes[username];
-                            const heroName = heroId
-                                ? gameSession.heroes.find((hero) => hero.id === heroId)?.name
-                                : null;
-                            return (
-                                <li key={index} className={styles.playerItem}>
-                                    <span className={styles.playerName}>{username}</span>
-                                    {heroName && (
-                                        <span className={styles.heroSelected}>
-                                            <span className={styles.checkmark}>✔</span>{heroName}
-                                        </span>
-                                    )}
-                                </li>
-                            );
+                        {game.users.map((username) => {
+                            const selected = game.heroes.find((hero) => hero.id === game.selectedHeroes[username]);
+                            return <li key={username} className={styles.playerItem}>
+                                <span className={styles.playerName}>{username}</span>
+                                {selected && <span className={styles.heroSelected}><span className={styles.checkmark}>✔</span>{selected.name}</span>}
+                            </li>;
                         })}
                     </ul>
+                    {game.users.length < 2 && <p>Waiting for another player to join…</p>}
                 </div>
                 <div className={styles.heroes}>
-                    <h3>Heroes</h3>
+                    <h3>Choose your hero</h3>
                     <div className={styles.heroList}>
-                        {gameSession.heroes.map((hero) => {
-                            const isHeroSelected = Object.values(gameSession.selectedHeroes).includes(hero.id);
-                            return (
-                                <div
-                                    key={hero.id}
-                                    className={`${styles.heroCard} ${isHeroSelected ? styles.selectedHero : ''}`}
-                                    onClick={() => handleHeroSelect(hero)}
-                                >
-
-                                    <img
-                                        src={`/assets/images/${hero.imageUrl}`}
-                                        alt={hero.name}
-                                        className={styles.heroImage}
-                                    />
-                                    <div className={styles.heroBackground}></div> {/* Adding background behind the hero */}
-                                    <div className={styles.heroStats}>
-                                        <p>
-                                            <strong>{hero.name}</strong>
-                                        </p>
-                                        <p>HP: {hero.hp}/{hero.maxHp}</p>
-                                        <p>Mana: {hero.mana}/{hero.maxMana}</p>
-                                        <p>Attack: {hero.attack}</p>
-                                        <p>Defense: {hero.defense}</p>
-                                        <p>Attack Damage: {hero.attackDamage}</p>
-                                        <p>Attack Speed: {hero.attackSpeed}</p>
-                                        <p>Main Element: {hero.mainElement}</p>
-                                    </div>
+                        {game.heroes.map((hero) => {
+                            const selectedBy = Object.entries(game.selectedHeroes).find(([, id]) => id === hero.id)?.[0];
+                            const unavailable = Boolean(selectedBy && selectedBy !== currentUsername);
+                            return <button type="button" key={hero.id}
+                                           className={`${styles.heroCard} ${selectedBy ? styles.selectedHero : ''}`}
+                                           onClick={() => void handleHeroSelect(hero)} disabled={unavailable || selecting}>
+                                <img src={`/assets/images/${hero.imageUrl}`} alt={hero.name} className={styles.heroImage} />
+                                <div className={styles.heroBackground}></div>
+                                <div className={styles.heroStats}>
+                                    <p><strong>{hero.name}</strong></p>
+                                    <p>HP: {hero.hp}/{hero.maxHp}</p><p>Mana: {hero.mana}/{hero.maxMana}</p>
+                                    <p>Attack: {hero.attack}</p><p>Defense: {hero.defense}</p>
+                                    <p>Attack Damage: {hero.attackDamage}</p><p>Attack Speed: {hero.attackSpeed}</p>
+                                    <p>Main Element: {hero.mainElement}</p>
+                                    {unavailable && <p>Selected by {selectedBy}</p>}
                                 </div>
-                            );
+                            </button>;
                         })}
                     </div>
                 </div>
-                {error && <div className={styles.errorMessage}>{error}</div>}
-                <div className={styles.duelControl}>
-                    <button onClick={handleGoToDuel} disabled={!allPlayersReady}>
-                        Go to Duel
-                    </button>
-                </div>
+                {error && <div role="alert" className={styles.errorMessage}>{error}</div>}
+                {Object.keys(game.selectedHeroes).length === 2 && <p>Both heroes are ready. Entering the duel…</p>}
             </div>
         </div>
     );

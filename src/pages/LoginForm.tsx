@@ -1,49 +1,32 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styles from '../styles/LoginForm.module.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import {BASE_URL} from "../services/GameService";
+import { getErrorMessage } from '../api/client';
+import { login } from '../services/GameService';
+import { storeAuth } from '../auth/token';
 
-const LoginForm: React.FC = () => {
+const LoginForm = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [submitting, setSubmitting] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
+        if (submitting) return;
+        setSubmitting(true);
+        setErrorMessage('');
         try {
-            const response = await axios.post(`${BASE_URL}/api/login`, { username, password }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                withCredentials: true
-            });
-
-            if (response.status === 200) {
-                const token = response.data.token || response.headers['Authorization']?.split(' ')[1];
-                if (token) {
-                    localStorage.setItem('token', token);
-                    localStorage.setItem('username', response.data.username);
-                    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                    navigate('/home');
-                } else {
-                    setErrorMessage('Login failed: Authorization token missing');
-                }
-            } else {
-                setErrorMessage('Login failed: Response data is undefined');
-            }
+            const response = await login(username.trim(), password);
+            storeAuth(response.token, response.username);
+            const destination = (location.state as { from?: string } | null)?.from || '/home';
+            navigate(destination, { replace: true });
         } catch (error) {
-            if (axios.isAxiosError(error)) {
-                if (error.response && error.response.status === 401) {
-                    setErrorMessage('Login failed: Unauthorized');
-                } else {
-                    setErrorMessage('Login failed: An error occurred');
-                }
-            } else {
-                setErrorMessage('Login failed: An error occurred');
-            }
+            setErrorMessage(getErrorMessage(error, 'Login failed. Check your username and password.'));
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -52,16 +35,20 @@ const LoginForm: React.FC = () => {
             <form onSubmit={handleSubmit} className={styles.loginForm}>
                 <h2>Login</h2>
                 <div className="mb-3">
-                    <input type="username" className="form-control" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required />
+                    <label htmlFor="login-username" className="form-label">Username</label>
+                    <input id="login-username" className="form-control" value={username}
+                           onChange={(event) => setUsername(event.target.value)} autoComplete="username" required />
                 </div>
                 <div className="mb-3">
-                    <input type="password" className="form-control" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    <label htmlFor="login-password" className="form-label">Password</label>
+                    <input id="login-password" type="password" className="form-control" value={password}
+                           onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required />
                 </div>
-                <button type="submit" className="btn btn-primary w-100">Login</button>
-                {errorMessage && <p className="text-danger text-center mt-3">{errorMessage}</p>}
-                <p className="text-center mt-3">
-                    Don't have an account? <a href="/register">Register here</a>
-                </p>
+                <button type="submit" className="btn btn-primary w-100" disabled={submitting}>
+                    {submitting ? 'Logging in…' : 'Login'}
+                </button>
+                {errorMessage && <p role="alert" className="text-danger text-center mt-3">{errorMessage}</p>}
+                <p className="text-center mt-3">Don't have an account? <Link to="/register">Register here</Link></p>
             </form>
         </div>
     );

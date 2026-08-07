@@ -33,15 +33,6 @@ const Navbar: React.FC = () => {
                         <li className="nav-item">
                             <a
                                 className={`nav-link ${styles.navLink}`}
-                                onClick={() => navigate('/duel-demo')}
-                                style={{ cursor: 'pointer' }}
-                            >
-                                Duel Demo
-                            </a>
-                        </li>
-                        <li className="nav-item">
-                            <a
-                                className={`nav-link ${styles.navLink}`}
                                 onClick={() => navigate('/account')}
                                 style={{ cursor: 'pointer' }}
                             >
